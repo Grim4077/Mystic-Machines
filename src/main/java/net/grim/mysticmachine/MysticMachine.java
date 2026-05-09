@@ -70,7 +70,6 @@ public class MysticMachine {
         event.accept(ModBlocks.RUBY_ORE);
         event.accept(ModBlocks.MACHINE_TURBINE);
         event.accept(ModBlocks.BOILER);
-        event.accept(ModBlocks.MACHINE_TURBINE);
         }
     }
 

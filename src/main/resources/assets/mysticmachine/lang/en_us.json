@@ -14,8 +14,6 @@
 
   "block.mysticmachine.machine_boiler": "Boiler",
 
-  "block.mysticmachine.machine_turbine": "Turbine",
-
   "creativetab.mysticmachine.mod_items": "Mod Items",
   "creativetab.mysticmachine.mod_blocks": "Mod Blocks"
 }

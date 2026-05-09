@@ -29,13 +29,7 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
 
             .add(ModBlocks.MACHINE_TURBINE.get())
-            .add(ModBlocks.SAPPHIRE_ORE.get())
-
             .add(ModBlocks.BOILER.get());
-            .add(ModBlocks.SAPPHIRE_ORE.get())
-
-
-            .add(ModBlocks.MACHINE_TURBINE.get());
 
     tag(BlockTags.NEEDS_IRON_TOOL)
             .add(ModBlocks.RUBY_BLOCK.get())
