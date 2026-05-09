@@ -35,6 +35,8 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         //Machines
         dropSelf((ModBlocks.BOILER.get()));
 
+        dropSelf(ModBlocks.MACHINE_TURBINE.get());
+
         add(ModBlocks.RUBY_ORE.get(),
                 block -> createMultipleOreDrops(ModBlocks.RUBY_ORE.get(), ModItems.RUBY.get(),
                         1,3));

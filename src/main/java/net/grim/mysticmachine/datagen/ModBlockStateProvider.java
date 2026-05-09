@@ -3,6 +3,7 @@ package net.grim.mysticmachine.datagen;
 import net.grim.mysticmachine.MysticMachine;
 import net.grim.mysticmachine.block.ModBlocks;
 import net.minecraft.data.PackOutput;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -26,6 +27,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         //Machines
         blockWithItem(ModBlocks.BOILER);
+
+        blockWithItem(ModBlocks.MACHINE_TURBINE);
     }
     private void blockWithItem(DeferredBlock<?> deferredBlock) {
         simpleBlockWithItem(deferredBlock.get(), cubeAll(deferredBlock.get()));

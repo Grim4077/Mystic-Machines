@@ -39,6 +39,8 @@ public class ModCreativeModTabs {
                         output.accept(ModBlocks.MACHINE_TURBINE);
 
                         output.accept(ModBlocks.BOILER);
+
+                        output.accept(ModBlocks.MACHINE_TURBINE);
                     }).build());
 
     public static void register(IEventBus eventBus) {
