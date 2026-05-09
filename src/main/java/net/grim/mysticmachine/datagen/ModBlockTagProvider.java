@@ -25,7 +25,10 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
             .add(ModBlocks.SAPPHIRE_BLOCK.get())
             .add(ModBlocks.DEEPSLATE_SAPPHIRE_ORE.get())
-            .add(ModBlocks.SAPPHIRE_ORE.get());
+            .add(ModBlocks.SAPPHIRE_ORE.get())
+
+
+            .add(ModBlocks.MACHINE_TURBINE.get());
 
     tag(BlockTags.NEEDS_IRON_TOOL)
             .add(ModBlocks.RUBY_BLOCK.get())
@@ -34,6 +37,8 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
             .add(ModBlocks.SAPPHIRE_BLOCK.get())
             .add(ModBlocks.DEEPSLATE_SAPPHIRE_ORE.get())
-            .add(ModBlocks.SAPPHIRE_ORE.get());
+            .add(ModBlocks.SAPPHIRE_ORE.get())
+
+            .add(ModBlocks.MACHINE_TURBINE.get());
     }
 }

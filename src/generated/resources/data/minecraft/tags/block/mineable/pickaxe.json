@@ -5,6 +5,7 @@
     "mysticmachine:ruby_ore",
     "mysticmachine:sapphire_block",
     "mysticmachine:deepslate_sapphire_ore",
-    "mysticmachine:sapphire_ore"
+    "mysticmachine:sapphire_ore",
+    "mysticmachine:machine_turbine"
   ]
 }
