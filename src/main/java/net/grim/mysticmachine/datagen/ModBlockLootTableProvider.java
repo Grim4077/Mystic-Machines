@@ -30,6 +30,9 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.RUBY_BLOCK.get());
         dropSelf(ModBlocks.SAPPHIRE_BLOCK.get());
 
+        //Machines
+        dropSelf((ModBlocks.BOILER.get()));
+
         add(ModBlocks.RUBY_ORE.get(),
                 block -> createMultipleOreDrops(ModBlocks.RUBY_ORE.get(), ModItems.RUBY.get(),
                         1,3));
@@ -43,6 +46,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         add(ModBlocks.DEEPSLATE_SAPPHIRE_ORE.get(),
                 block -> createMultipleOreDrops(ModBlocks.DEEPSLATE_SAPPHIRE_ORE.get(), ModItems.SAPPHIRE.get(),
                         1,3));
+
     }
 
     protected LootTable.Builder createMultipleOreDrops(Block pblock, Item item, float minDrops, float maxDrops) {

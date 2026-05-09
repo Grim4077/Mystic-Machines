@@ -6,6 +6,7 @@ import net.grim.mysticmachine.items.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.conditions.IConditionBuilder;
@@ -53,6 +54,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .requires(ModBlocks.SAPPHIRE_BLOCK)
                 .unlockedBy("has_sapphire_block", has(ModBlocks.SAPPHIRE_BLOCK))
                 .save(recipeOutput);
+
+        //Machines
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.BOILER.get())
+                        .pattern("III")
+                        .pattern("IBI")
+                        .pattern("CCC")
+                        .define('I', Items.IRON_INGOT)
+                        .define('B', Items.BUCKET)
+                        .define('C', Items.COPPER_INGOT)
+                        .unlockedBy("has_iron_ingot", has(Items.IRON_INGOT)).save(recipeOutput);
 
         oreSmelting(recipeOutput, RUBY_SMELTTABLES, RecipeCategory.MISC, ModItems.RUBY.get(), 0.25f, 200, "ruby");
         oreSmelting(recipeOutput, SAPPHIRE_SMELTABLES, RecipeCategory.MISC, ModItems.SAPPHIRE.get(), 0.25f, 200, "sapphire");

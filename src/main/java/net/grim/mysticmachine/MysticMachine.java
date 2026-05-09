@@ -68,6 +68,7 @@ public class MysticMachine {
         event.accept(ModBlocks.RUBY_BLOCK);
         event.accept(ModBlocks.SAPPHIRE_ORE);
         event.accept(ModBlocks.RUBY_ORE);
+        event.accept(ModBlocks.BOILER);
         }
     }
 

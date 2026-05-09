@@ -44,6 +44,12 @@ public class ModBlocks {
             () -> new Block(BlockBehaviour.Properties.of()
                     .strength(5.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.COPPER_BULB)));
 
+    // Machines
+    public static final DeferredBlock<Block> BOILER = registerBlock("machine_boiler",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .strength(5.0f,6.0f).sound(SoundType.METAL)));
+
+
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);
         registerBlockItem(name, toReturn);

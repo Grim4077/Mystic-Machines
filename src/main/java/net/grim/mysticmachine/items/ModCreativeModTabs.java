@@ -35,6 +35,8 @@ public class ModCreativeModTabs {
                         output.accept(ModBlocks.SAPPHIRE_ORE);
                         output.accept(ModBlocks.DEEPSLATE_SAPPHIRE_ORE);
                         output.accept(ModBlocks.SAPPHIRE_BLOCK);
+
+                        output.accept(ModBlocks.BOILER);
                     }).build());
 
     public static void register(IEventBus eventBus) {
