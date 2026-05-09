@@ -1,0 +1,10 @@
+{
+  "values": [
+    "mysticmachine:ruby_block",
+    "mysticmachine:deepslate_ruby_ore",
+    "mysticmachine:ruby_ore",
+    "mysticmachine:sapphire_block",
+    "mysticmachine:deepslate_sapphire_ore",
+    "mysticmachine:sapphire_ore"
+  ]
+}
