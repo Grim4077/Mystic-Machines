@@ -1,6 +1,7 @@
 package net.grim.mysticmachine;
 
 import net.grim.mysticmachine.block.ModBlocks;
+import net.grim.mysticmachine.block.entity.ModBlockEntities;
 import net.grim.mysticmachine.items.ModCreativeModTabs;
 import net.grim.mysticmachine.items.ModItems;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -45,6 +46,7 @@ public class MysticMachine {
 
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModBlockEntities.register(modEventBus);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);

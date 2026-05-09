@@ -1,6 +1,7 @@
 package net.grim.mysticmachine.block;
 
 import net.grim.mysticmachine.MysticMachine;
+import net.grim.mysticmachine.block.custom.BoilerBlock;
 import net.grim.mysticmachine.items.ModItems;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
@@ -53,7 +54,7 @@ public class ModBlocks {
 
     // Machines
     public static final DeferredBlock<Block> BOILER = registerBlock("machine_boiler",
-            () -> new Block(BlockBehaviour.Properties.of()
+            () -> new BoilerBlock(BlockBehaviour.Properties.of()
                     .strength(5.0f,6.0f).sound(SoundType.METAL)));
 
 
