@@ -44,7 +44,6 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('S', ModItems.SAPPHIRE.get())
                 .unlockedBy("has_sapphire", has(ModItems.SAPPHIRE)).save(recipeOutput);
 
-
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.RUBY.get(), 9)
                 .requires(ModBlocks.RUBY_BLOCK)
                 .unlockedBy("has_ruby_block", has(ModBlocks.RUBY_BLOCK))
@@ -70,6 +69,15 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
 
         oreBlasting(recipeOutput, RUBY_SMELTTABLES, RecipeCategory.MISC, ModItems.RUBY.get(), 0.25f, 100, "ruby");
         oreBlasting(recipeOutput, SAPPHIRE_SMELTABLES, RecipeCategory.MISC, ModItems.SAPPHIRE.get(), 0.25f, 100, "sapphire");
+
+
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.MACHINE_TURBINE.get())
+                    .pattern("III")
+                    .pattern("IsI")
+                    .pattern("III")
+                    .define('I', Items.IRON_INGOT)
+                    .define('s', Items.NETHER_STAR)
+                    .unlockedBy("has_iron", has(Items.IRON_INGOT)).save(recipeOutput);
     }
 
     protected static void oreSmelting(RecipeOutput recipeOutput, List<ItemLike> pIngredients, RecipeCategory pCategory, ItemLike pResult,

@@ -44,6 +44,17 @@ public class ModBlocks {
             () -> new Block(BlockBehaviour.Properties.of()
                     .strength(5.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.COPPER_BULB)));
 
+
+
+
+    public static final DeferredBlock<Block> MACHINE_TURBINE = registerBlock("machine_turbine",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .strength(5.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.METAL)));
+
+
+
+
+
     // Machines
     public static final DeferredBlock<Block> BOILER = registerBlock("machine_boiler",
             () -> new Block(BlockBehaviour.Properties.of()

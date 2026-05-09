@@ -22,6 +22,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
         blockWithItem(ModBlocks.DEEPSLATE_SAPPHIRE_ORE);
         blockWithItem(ModBlocks.SAPPHIRE_ORE);
 
+        blockWithItem(ModBlocks.MACHINE_TURBINE);
+
         //Machines
         blockWithItem(ModBlocks.BOILER);
     }

@@ -36,6 +36,8 @@ public class ModCreativeModTabs {
                         output.accept(ModBlocks.DEEPSLATE_SAPPHIRE_ORE);
                         output.accept(ModBlocks.SAPPHIRE_BLOCK);
 
+                        output.accept(ModBlocks.MACHINE_TURBINE);
+
                         output.accept(ModBlocks.BOILER);
                     }).build());
 
