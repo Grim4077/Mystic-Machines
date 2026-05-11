@@ -1,10 +1,18 @@
 package net.grim.mysticmachine.block.entity;
 
+import net.grim.mysticmachine.screen.menu.BoilerMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -14,22 +22,43 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.items.ItemStackHandler;
-import net.minecraft.tags.ItemTags;
+import org.jetbrains.annotations.Nullable;
 
-public class BoilerBlockEntity extends BlockEntity {
+public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
 
-    // Fluid containers
-    //private final FluidTank waterTank = new FluidTank(8000);
-    private final FluidTank steamTank = new FluidTank(8000);
+    public final FluidTank steamTank = new FluidTank(8000);
+    public final ItemStackHandler itemHandler = new ItemStackHandler(1) {
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return stack.is(ItemTags.COALS);
+        }
+    };
 
     private int litTime = 0;
-    private int steamTickRate = 2;
+    private int steamTickRate = 10;
 
-    private final ItemStackHandler itemHandler = new ItemStackHandler(1) {
+    // ContainerData syncs these values to the client automatically
+    protected final ContainerData data = new ContainerData() {
         @Override
-        public boolean isItemValid(int slot, ItemStack stack)
-        {
-            return stack.is(ItemTags.COALS);
+        public int get(int index) {
+            return switch (index) {
+                case 0 -> litTime;
+                case 1 -> steamTank.getFluidAmount();
+                default -> 0;
+            };
+        }
+
+        @Override
+        public void set(int index, int value) {
+            switch (index) {
+                case 0 -> litTime = value;
+                case 1 -> {} // steamTank is read-only from client side
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
         }
     };
 
@@ -37,23 +66,32 @@ public class BoilerBlockEntity extends BlockEntity {
         super(ModBlockEntities.BOILER_BE.get(), pos, state);
     }
 
-    // Called every server tick via the ticker in BoilerBlock
+    // MenuProvider implementation
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("block.mysticmachine.machine_boiler");
+    }
+
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+        return new BoilerMenu(containerId, playerInventory, this, this.data);
+    }
+
     public void tick(Level level, BlockPos pos, BlockState state) {
         if (level.isClientSide()) return;
 
         boolean saveFlag = false;
-        
+
         if (isLit()) {
             produceSteam();
             --litTime;
         }
 
-        if (!isLit() && canProduceSteam(level,pos)) {
-
+        if (!isLit() && canProduceSteam(level, pos)) {
             saveFlag = true;
 
             ItemStack stack = itemHandler.getStackInSlot(0);
-
             litTime = stack.getBurnTime(null);
 
             if (isLit()) {
@@ -61,62 +99,47 @@ public class BoilerBlockEntity extends BlockEntity {
             }
         }
 
-        if (saveFlag)
-        {
+        if (saveFlag) {
             setChanged();
         }
-
     }
 
-    // Save data when the chunk is saved
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-
         tag.putInt("LitTime", litTime);
-        steamTank.writeToNBT(registries,tag);
-
+        steamTank.writeToNBT(registries, tag);
         tag.put("Inventory", itemHandler.serializeNBT(registries));
     }
 
-    // Load data when the chunk loads
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-
         litTime = tag.getInt("LitTime");
-        steamTank.readFromNBT(registries,tag);
-
+        steamTank.readFromNBT(registries, tag);
         itemHandler.deserializeNBT(registries, tag.getCompound("Inventory"));
     }
 
-    private boolean isAdjacentToWater(Level level, BlockPos pos)
-    {
-        for (Direction dir : Direction.values())
-        {
+    public boolean isAdjacentToWater(Level level, BlockPos pos) {
+        for (Direction dir : Direction.values()) {
             if (level.getFluidState(pos.relative(dir)).is(FluidTags.WATER))
                 return true;
         }
-
         return false;
     }
 
-    private boolean canProduceSteam(Level level, BlockPos pos)
-    {
-        if (!itemHandler.getStackInSlot(0).isEmpty() && itemHandler.isItemValid(0,itemHandler.getStackInSlot(0)) && steamTank.getFluidAmount() < steamTank.getCapacity()) { //Checks if coal is present and steam reserve has space
-            return isAdjacentToWater(level, pos); //Checks if boiler is next to water block
+    private boolean canProduceSteam(Level level, BlockPos pos) {
+        if (!itemHandler.getStackInSlot(0).isEmpty() && itemHandler.isItemValid(0, itemHandler.getStackInSlot(0)) && steamTank.getFluidAmount() < steamTank.getCapacity()) {
+            return isAdjacentToWater(level, pos);
         }
-
         return false;
     }
 
-    private void produceSteam()
-    {
-        steamTank.fill(new FluidStack(Fluids.WATER, steamTickRate), IFluidHandler.FluidAction.EXECUTE); //TODO Add steam later to replace water
+    private void produceSteam() {
+        steamTank.fill(new FluidStack(Fluids.WATER, steamTickRate), IFluidHandler.FluidAction.EXECUTE);
     }
 
-    private boolean isLit()
-    {
+    public boolean isLit() {
         return this.litTime > 0;
     }
 }

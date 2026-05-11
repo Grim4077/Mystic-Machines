@@ -4,6 +4,9 @@ import net.grim.mysticmachine.block.ModBlocks;
 import net.grim.mysticmachine.block.entity.ModBlockEntities;
 import net.grim.mysticmachine.items.ModCreativeModTabs;
 import net.grim.mysticmachine.items.ModItems;
+import net.grim.mysticmachine.screen.ModMenuTypes;
+import net.grim.mysticmachine.screen.BoilerScreen;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.minecraft.world.item.CreativeModeTabs;
 import org.slf4j.Logger;
 
@@ -47,6 +50,7 @@ public class MysticMachine {
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        ModMenuTypes.register(modEventBus);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
@@ -89,6 +93,11 @@ public class MysticMachine {
             // Some client setup code
             LOGGER.info("HELLO FROM CLIENT SETUP");
             LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        }
+
+        @SubscribeEvent
+        static void registerScreens(RegisterMenuScreensEvent event) {
+            event.register(ModMenuTypes.BOILER_MENU.get(), BoilerScreen::new);
         }
     }
 }
