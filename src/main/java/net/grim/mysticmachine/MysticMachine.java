@@ -2,6 +2,7 @@ package net.grim.mysticmachine;
 
 import net.grim.mysticmachine.block.ModBlocks;
 import net.grim.mysticmachine.block.entity.ModBlockEntities;
+import net.grim.mysticmachine.fluid.ModFluids;
 import net.grim.mysticmachine.items.ModCreativeModTabs;
 import net.grim.mysticmachine.items.ModItems;
 import net.grim.mysticmachine.screen.ModMenuTypes;
@@ -51,6 +52,7 @@ public class MysticMachine {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModMenuTypes.register(modEventBus);
+        ModFluids.register(modEventBus);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);

@@ -1,5 +1,6 @@
 package net.grim.mysticmachine.block.entity;
 
+import net.grim.mysticmachine.fluid.ModFluids;
 import net.grim.mysticmachine.screen.menu.BoilerMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,7 +27,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
 
-    public final FluidTank steamTank = new FluidTank(8000);
+    public final FluidTank steamTank = new FluidTank(8000) {
+        @Override
+        public boolean isFluidValid(FluidStack stack) {
+            return stack.getFluid() == ModFluids.STEAM.get();
+        }
+    };
+
     public final ItemStackHandler itemHandler = new ItemStackHandler(1) {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
@@ -136,7 +143,7 @@ public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     private void produceSteam() {
-        steamTank.fill(new FluidStack(Fluids.WATER, steamTickRate), IFluidHandler.FluidAction.EXECUTE);
+        steamTank.fill(new FluidStack(ModFluids.STEAM.get(), steamTickRate), IFluidHandler.FluidAction.EXECUTE);
     }
 
     public boolean isLit() {
