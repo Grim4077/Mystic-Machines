@@ -2,6 +2,7 @@ package net.grim.mysticmachine.block;
 
 import net.grim.mysticmachine.MysticMachine;
 import net.grim.mysticmachine.block.custom.BoilerBlock;
+import net.grim.mysticmachine.block.custom.TurbineBlock;
 import net.grim.mysticmachine.items.ModItems;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
@@ -47,11 +48,11 @@ public class ModBlocks {
 
 
 
-
     public static final DeferredBlock<Block> MACHINE_TURBINE = registerBlock("machine_turbine",
-            () -> new Block(BlockBehaviour.Properties.of()
-                    .strength(5.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.METAL)));
-
+            () -> new TurbineBlock(BlockBehaviour.Properties.of()
+                    .strength(5.0F, 6.0F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)));
     // Machines
     public static final DeferredBlock<Block> BOILER = registerBlock("machine_boiler",
             () -> new BoilerBlock(BlockBehaviour.Properties.of()

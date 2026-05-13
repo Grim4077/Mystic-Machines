@@ -2,6 +2,7 @@ package net.grim.mysticmachine.screen;
 
 import net.grim.mysticmachine.MysticMachine;
 import net.grim.mysticmachine.screen.menu.BoilerMenu;
+import net.grim.mysticmachine.screen.menu.TurbineMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
@@ -16,6 +17,10 @@ public class ModMenuTypes {
     public static final DeferredHolder<MenuType<?>, MenuType<BoilerMenu>> BOILER_MENU =
             MENUS.register("boiler_menu", () ->
                     IMenuTypeExtension.create(BoilerMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<TurbineMenu>> TURBINE_MENU =
+            MENUS.register("turbine_menu", () ->
+                    IMenuTypeExtension.create(TurbineMenu::new));
 
     public static void register(IEventBus eventBus) {
         MENUS.register(eventBus);

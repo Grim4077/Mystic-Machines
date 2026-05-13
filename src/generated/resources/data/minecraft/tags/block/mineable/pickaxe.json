@@ -7,9 +7,6 @@
     "mysticmachine:deepslate_sapphire_ore",
     "mysticmachine:sapphire_ore",
     "mysticmachine:machine_turbine",
-    "mysticmachine:sapphire_ore",
-    "mysticmachine:machine_boiler",
-    "mysticmachine:sapphire_ore",
-    "mysticmachine:machine_turbine"
+    "mysticmachine:machine_boiler"
   ]
 }

@@ -7,6 +7,7 @@ import net.grim.mysticmachine.items.ModCreativeModTabs;
 import net.grim.mysticmachine.items.ModItems;
 import net.grim.mysticmachine.screen.ModMenuTypes;
 import net.grim.mysticmachine.screen.BoilerScreen;
+import net.grim.mysticmachine.screen.TurbineScreen;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.minecraft.world.item.CreativeModeTabs;
 import org.slf4j.Logger;
@@ -100,6 +101,7 @@ public class MysticMachine {
         @SubscribeEvent
         static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.BOILER_MENU.get(), BoilerScreen::new);
+            event.register(ModMenuTypes.TURBINE_MENU.get(), TurbineScreen::new);
         }
     }
 }
