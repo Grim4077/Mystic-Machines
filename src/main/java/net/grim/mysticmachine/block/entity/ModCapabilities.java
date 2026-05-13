@@ -18,5 +18,11 @@ public class ModCapabilities {
                 ModBlockEntities.BOILER_BE.get(), // Which block entity type?
                 (blockEntity, side) -> blockEntity.steamTank  // Return the tank for any side
         );
+
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ModBlockEntities.TURBINE_BE.get(),
+                (blockEntity, side) -> blockEntity.steamTank
+        );
     }
 }

@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
@@ -106,6 +107,11 @@ public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
             }
         }
 
+        if (steamTank.getFluidAmount() > 0) {
+            transferSteam();
+            saveFlag = true;
+        }
+
         if (saveFlag) {
             setChanged();
         }
@@ -144,6 +150,38 @@ public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
 
     private void produceSteam() {
         steamTank.fill(new FluidStack(ModFluids.STEAM.get(), steamTickRate), IFluidHandler.FluidAction.EXECUTE);
+    }
+
+    private void transferSteam() {
+        // Determine how much we CAN send from our tank first
+        int maxExtract = Math.min(steamTank.getFluidAmount(), 100); // Send up to 100mb per tick
+        if (maxExtract <= 0) return;
+
+        FluidStack available = new FluidStack(ModFluids.STEAM.get(), maxExtract);
+
+        for (Direction dir : Direction.values()) {
+            if (available.isEmpty()) break;
+
+            BlockEntity targetBE = level.getBlockEntity(worldPosition.relative(dir));
+            if (targetBE == null) continue;
+
+            // Get the fluid handler of the neighbor
+            IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK,
+                    worldPosition.relative(dir), dir.getOpposite());
+
+            if (handler != null) {
+                // How much can the neighbor actually take?
+                int accepted = handler.fill(available, IFluidHandler.FluidAction.EXECUTE);
+
+                if (accepted > 0) {
+                    // Drain only what was actually accepted from our tank
+                    steamTank.drain(accepted, IFluidHandler.FluidAction.EXECUTE);
+
+                    // Update our 'available' stack for the next direction in the loop
+                    available.shrink(accepted);
+                }
+            }
+        }
     }
 
     public boolean isLit() {
