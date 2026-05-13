@@ -1,6 +1,7 @@
 package net.grim.mysticmachine.block.entity;
 
 import net.grim.mysticmachine.block.entity.renderer.ModBlockEntities;
+import net.grim.mysticmachine.fluid.ModFluids;
 import net.grim.mysticmachine.screen.menu.TurbineMenu;
 import net.grim.mysticmachine.util.CustomEnergy;
 import net.minecraft.core.BlockPos;
@@ -10,45 +11,34 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.Nullable;
 
 public class TurbineBlockEntity extends BlockEntity implements MenuProvider {
 
-    public TurbineBlockEntity(BlockPos pos, BlockState blockState) {
-        super(ModBlockEntities.TURBINE_BE.get(), pos, blockState);
-        this.data = createContainerData();
-    }
+    // Steam consumption and energy production constants
+    private static final int STEAM_PER_TICK = 5;
+    private static final int FE_PER_TICK = 40;
 
-    public final ItemStackHandler itemHandler = new ItemStackHandler(2) {
+    // Steam tank - only accepts mysticmachine steam
+    public final FluidTank steamTank = new FluidTank(8000) {
         @Override
-        protected void onContentsChanged(int slot) {
-            setChanged();
-            if (level != null && !level.isClientSide()) {
-                level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
-            }
+        public boolean isFluidValid(FluidStack stack) {
+            return stack.getFluid() == ModFluids.STEAM.get();
         }
     };
 
-    private static final int INPUT_SLOT = 0;
-    private static final int OUTPUT_SLOT = 1;
-    private static final int FE_PER_TICK = 20;
-
-    private int burnTime = 0;
-    private int maxBurnTime = 0;
-
+    // Energy storage
     private final CustomEnergy ENERGY_STORAGE = new CustomEnergy(25000, 40, 40) {
         @Override
         public void onContentsChanged() {
@@ -58,13 +48,18 @@ public class TurbineBlockEntity extends BlockEntity implements MenuProvider {
 
     protected final ContainerData data;
 
+    public TurbineBlockEntity(BlockPos pos, BlockState blockState) {
+        super(ModBlockEntities.TURBINE_BE.get(), pos, blockState);
+        this.data = createContainerData();
+    }
+
     private ContainerData createContainerData() {
         return new ContainerData() {
             @Override
             public int get(int i) {
                 return switch (i) {
-                    case 0 -> burnTime;
-                    case 1 -> maxBurnTime;
+                    case 0 -> steamTank.getFluidAmount();  // Current steam
+                    case 1 -> steamTank.getCapacity();     // Max steam
                     case 2 -> ENERGY_STORAGE.getEnergyStored();
                     case 3 -> ENERGY_STORAGE.getMaxEnergyStored();
                     default -> 0;
@@ -74,9 +69,8 @@ public class TurbineBlockEntity extends BlockEntity implements MenuProvider {
             @Override
             public void set(int i, int value) {
                 switch (i) {
-                    case 0 -> burnTime = value;
-                    case 1 -> maxBurnTime = value;
                     case 2 -> ENERGY_STORAGE.setEnergy(value);
+                    // Steam tank is read only from client side
                 }
             }
 
@@ -102,55 +96,40 @@ public class TurbineBlockEntity extends BlockEntity implements MenuProvider {
         if (level.isClientSide()) return;
 
         boolean dirty = false;
-        ItemStack fuel = itemHandler.getStackInSlot(INPUT_SLOT);
 
-        if (burnTime <= 0 && isFuel(fuel)) {
-            burnTime = getFuelBurnTime(fuel);
-            maxBurnTime = burnTime;
-            itemHandler.extractItem(INPUT_SLOT, 1, false);
-            dirty = true;
-        }
+        // If we have steam and energy storage isn't full, consume steam and produce FE
+        if (steamTank.getFluidAmount() >= STEAM_PER_TICK &&
+                ENERGY_STORAGE.getEnergyStored() < ENERGY_STORAGE.getMaxEnergyStored()) {
 
-        if (burnTime > 0) {
-            burnTime--;
+            // Drain steam from tank
+            steamTank.drain(new FluidStack(ModFluids.STEAM.get(), STEAM_PER_TICK),
+                    IFluidHandler.FluidAction.EXECUTE);
+
+            // Produce energy
             ENERGY_STORAGE.receiveEnergy(FE_PER_TICK, false);
+
             dirty = true;
         }
 
         if (dirty) setChanged(level, pos, state);
     }
 
-    private boolean isFuel(ItemStack stack) {
-        return stack.is(Items.COAL);
-    }
-
-    private int getFuelBurnTime(ItemStack stack) {
-        return stack.is(Items.COAL) ? 1600 : 0;
-    }
-
-    public void drops() {
-        SimpleContainer inventory = new SimpleContainer(itemHandler.getSlots());
-        for (int i = 0; i < itemHandler.getSlots(); i++) {
-            inventory.setItem(i, itemHandler.getStackInSlot(i));
-        }
-        Containers.dropContents(this.level, this.worldPosition, inventory);
+    // Used by the screen to determine if the turbine is actively generating
+    public boolean isBurning() {
+        return steamTank.getFluidAmount() > 0;
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tag.put("inventory", itemHandler.serializeNBT(registries));
-        tag.putInt("burnTime", burnTime);
-        tag.putInt("maxBurnTime", maxBurnTime);
+        steamTank.writeToNBT(registries, tag);
         tag.putInt("energy", ENERGY_STORAGE.getEnergyStored());
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        itemHandler.deserializeNBT(registries, tag.getCompound("inventory"));
-        burnTime = tag.getInt("burnTime");
-        maxBurnTime = tag.getInt("maxBurnTime");
+        steamTank.readFromNBT(registries, tag);
         ENERGY_STORAGE.setEnergy(tag.getInt("energy"));
     }
 

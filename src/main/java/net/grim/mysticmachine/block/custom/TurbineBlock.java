@@ -48,7 +48,7 @@ public class TurbineBlock extends BaseEntityBlock {
         if (pState.getBlock() != pNewState.getBlock()) {
             BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
             if (blockEntity instanceof TurbineBlockEntity turbineBlockEntity) {
-                turbineBlockEntity.drops();
+                //turbineBlockEntity.drops();
             }
         }
 

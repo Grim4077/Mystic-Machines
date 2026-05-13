@@ -8,18 +8,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.items.SlotItemHandler;
 
 public class TurbineMenu extends AbstractContainerMenu {
 
     public final TurbineBlockEntity blockEntity;
     private final ContainerData data;
     private final ContainerLevelAccess access;
-
-    private static final int MACHINE_SLOTS = 2;
-    private static final int PLAYER_INV_START = 2;
-    private static final int PLAYER_INV_END = 38;
 
     // CLIENT
     public TurbineMenu(int id, Inventory inv, FriendlyByteBuf buf) {
@@ -36,32 +30,23 @@ public class TurbineMenu extends AbstractContainerMenu {
         this.data = data;
         this.access = ContainerLevelAccess.create(be.getLevel(), be.getBlockPos());
 
-        addMachineSlots();
+        // No machine slots anymore
+
         addPlayerInventory(inv);
         addPlayerHotbar(inv);
 
         addDataSlots(data);
     }
 
-    private void addMachineSlots() {
-        // INPUT (coal)
-        this.addSlot(new SlotItemHandler(blockEntity.itemHandler, 0, 54, 34));
-
-        // OUTPUT (energy machines often still use item output)
-        this.addSlot(new SlotItemHandler(blockEntity.itemHandler, 1, 80, 59));
-    }
-
-    public boolean isBurning() {
-        return data.get(0) > 0;
-    }
-
-    public int getScaledBurnProgress() {
-        int burn = data.get(0);
+    // Steam amount scaled (for tank bar)
+    public int getScaledSteam() {
+        int steam = data.get(0);
         int max = data.get(1);
-        int pixels = 13;
-        return max == 0 ? 0 : burn * pixels / max;
+        int pixels = 52;
+        return max == 0 ? 0 : steam * pixels / max;
     }
 
+    // Energy bar
     public int getScaledEnergy() {
         int energy = data.get(2);
         int max = data.get(3);
@@ -77,38 +62,35 @@ public class TurbineMenu extends AbstractContainerMenu {
         return data.get(3);
     }
 
+    public int getSteam() {
+        return data.get(0);
+    }
+
+    public int getMaxSteam() {
+        return data.get(1);
+    }
+
+    public boolean isRunning() {
+        return getSteam() > 0 && getEnergy() < getMaxEnergy();
+    }
+
+    public boolean isBurning() {
+        // Turbine is "active" if it has steam
+        return data.get(0) > 0;
+    }
+
+    public int getScaledBurnProgress() {
+        int steam = data.get(0);     // current steam
+        int maxSteam = data.get(1);  // max steam
+        int pixels = 52;             // matches your GUI bar height
+
+        return maxSteam == 0 ? 0 : steam * pixels / maxSteam;
+    }
+
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        ItemStack result = ItemStack.EMPTY;
-        Slot slot = this.slots.get(index);
-
-        if (slot != null && slot.hasItem()) {
-            ItemStack stack = slot.getItem();
-            result = stack.copy();
-
-            // MACHINE → PLAYER
-            if (index < 2) {
-                if (!this.moveItemStackTo(stack, 2, this.slots.size(), true)) {
-                    return ItemStack.EMPTY;
-                }
-            }
-            // PLAYER → MACHINE
-            else {
-                if (stack.is(Items.COAL)) {
-                    if (!this.moveItemStackTo(stack, 0, 1, false)) {
-                        return ItemStack.EMPTY;
-                    }
-                }
-            }
-
-            if (stack.isEmpty()) {
-                slot.set(ItemStack.EMPTY);
-            } else {
-                slot.setChanged();
-            }
-        }
-
-        return result;
+        // No machine slots → nothing to shift-click into
+        return ItemStack.EMPTY;
     }
 
     @Override
