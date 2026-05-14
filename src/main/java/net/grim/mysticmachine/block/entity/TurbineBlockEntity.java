@@ -69,6 +69,33 @@ public class TurbineBlockEntity extends BlockEntity implements MenuProvider {
 
         boolean dirty = false;
 
+
+        // 1. PULL STEAM FROM WORLD
+        for (Direction dir : Direction.values()) {
+
+            IFluidHandler from = level.getCapability(
+                    Capabilities.FluidHandler.BLOCK,
+                    pos.relative(dir),
+                    null
+            );
+
+            if (from == null) continue;
+
+            FluidStack sim = from.drain(STEAM_PER_TICK, IFluidHandler.FluidAction.SIMULATE);
+
+            if (sim.isEmpty()) continue;
+
+            FluidStack drained = from.drain(STEAM_PER_TICK, IFluidHandler.FluidAction.EXECUTE);
+
+            if (!drained.isEmpty()) {
+                steamTank.fill(drained, IFluidHandler.FluidAction.EXECUTE);
+                dirty = true;
+                break;
+            }
+        }
+
+
+        // 2. CONVERT STEAM → ENERGY
         if (steamTank.getFluidAmount() >= STEAM_PER_TICK
                 && ENERGY_STORAGE.getEnergyStored() < ENERGY_STORAGE.getMaxEnergyStored()) {
 

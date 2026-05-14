@@ -44,7 +44,7 @@ public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
     };
 
     private int litTime = 0;
-    private int steamTickRate = 10;
+    private int steamTickRate = 50000;
 
     // ContainerData syncs these values to the client automatically
     protected final ContainerData data = new ContainerData() {
@@ -108,14 +108,20 @@ public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
             }
         }
 
-        if (steamTank.getFluidAmount() > 0) {
-            transferSteam(level, pos);
-            saveFlag = true;
-        }
+       if (steamTank.getFluidAmount() > 0) {
+          transferSteam(level, pos);
+         saveFlag = true;
+       }
 
         if (saveFlag) {
             setChanged();
         }
+    }
+    private void produceSteam() {
+        steamTank.fill(
+                new FluidStack(ModFluids.STEAM.get(), steamTickRate),
+                IFluidHandler.FluidAction.EXECUTE
+        );
     }
 
     @Override
@@ -151,21 +157,14 @@ public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
         return false;
     }
 
-    private void produceSteam() {
-        steamTank.fill(new FluidStack(ModFluids.STEAM.get(), steamTickRate), IFluidHandler.FluidAction.EXECUTE);
-    }
-    public IFluidHandler getSteamTank() {
-        return steamTank;
-    }
-
     private void transferSteam(Level level, BlockPos pos) {
 
-        int toSend = Math.min(steamTank.getFluidAmount(), 100);
-        if (toSend <= 0) return;
+        int amount = Math.min(steamTank.getFluidAmount(), 100);
+        if (amount <= 0) return;
+
+        FluidStack stack = new FluidStack(ModFluids.STEAM.get(), amount);
 
         for (Direction dir : Direction.values()) {
-
-            if (toSend <= 0) return;
 
             IFluidHandler handler = level.getCapability(
                     Capabilities.FluidHandler.BLOCK,
@@ -175,24 +174,16 @@ public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
 
             if (handler == null) continue;
 
-            FluidStack simulated = new FluidStack(ModFluids.STEAM.get(), toSend);
-
-            int accepted = handler.fill(simulated, IFluidHandler.FluidAction.SIMULATE);
+            int accepted = handler.fill(stack, IFluidHandler.FluidAction.EXECUTE);
 
             if (accepted > 0) {
-
-                int drained = handler.fill(
-                        new FluidStack(ModFluids.STEAM.get(), accepted),
-                        IFluidHandler.FluidAction.EXECUTE
-                );
-
-                steamTank.drain(drained, IFluidHandler.FluidAction.EXECUTE);
-
-                toSend -= drained;
+                steamTank.drain(accepted, IFluidHandler.FluidAction.EXECUTE);
+                stack.shrink(accepted);
             }
+
+            if (stack.isEmpty()) return;
         }
     }
-
     public boolean isLit() {
         return this.litTime > 0;
     }
