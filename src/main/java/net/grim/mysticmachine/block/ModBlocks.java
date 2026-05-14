@@ -2,6 +2,7 @@ package net.grim.mysticmachine.block;
 
 import net.grim.mysticmachine.MysticMachine;
 import net.grim.mysticmachine.block.custom.BoilerBlock;
+import net.grim.mysticmachine.block.custom.LiquidPipeBlock;
 import net.grim.mysticmachine.block.custom.TurbineBlock;
 import net.grim.mysticmachine.items.ModItems;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -12,8 +13,10 @@ import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
@@ -47,17 +50,24 @@ public class ModBlocks {
                     .strength(5.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.COPPER_BULB)));
 
 
-
+    // Machines
     public static final DeferredBlock<Block> MACHINE_TURBINE = registerBlock("machine_turbine",
             () -> new TurbineBlock(BlockBehaviour.Properties.of()
                     .strength(5.0F, 6.0F)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)));
-    // Machines
+
     public static final DeferredBlock<Block> BOILER = registerBlock("machine_boiler",
             () -> new BoilerBlock(BlockBehaviour.Properties.of()
                     .strength(5.0f,6.0f).sound(SoundType.METAL)));
 
+    // Pipes
+    public static final DeferredBlock<Block> LIQUID_PIPE = registerBlock("liquid_pipe",
+            () -> new LiquidPipeBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(1.0f)
+                    .noOcclusion())
+    );
 
 
 

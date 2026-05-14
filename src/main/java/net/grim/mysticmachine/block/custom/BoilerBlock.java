@@ -2,7 +2,7 @@ package net.grim.mysticmachine.block.custom;
 
 import com.mojang.serialization.MapCodec;
 import net.grim.mysticmachine.block.entity.BoilerBlockEntity;
-import net.grim.mysticmachine.block.entity.ModBlockEntities;
+import net.grim.mysticmachine.block.entity.renderer.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;

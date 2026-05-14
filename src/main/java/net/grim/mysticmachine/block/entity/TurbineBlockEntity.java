@@ -5,6 +5,7 @@ import net.grim.mysticmachine.fluid.ModFluids;
 import net.grim.mysticmachine.screen.menu.TurbineMenu;
 import net.grim.mysticmachine.util.CustomEnergy;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -19,26 +20,34 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
-import org.jetbrains.annotations.Nullable;
+
+
+import javax.annotation.Nullable;
 
 public class TurbineBlockEntity extends BlockEntity implements MenuProvider {
 
-    // Steam consumption and energy production constants
     private static final int STEAM_PER_TICK = 5;
     private static final int FE_PER_TICK = 40;
 
-    // Steam tank - only accepts mysticmachine steam
+    // 🔥 Steam tank
     public final FluidTank steamTank = new FluidTank(8000) {
         @Override
         public boolean isFluidValid(FluidStack stack) {
             return stack.getFluid() == ModFluids.STEAM.get();
         }
+
+        @Override
+        protected void onContentsChanged() {
+            setChanged();
+        }
     };
 
-    // Energy storage
+    // ⚡ Energy storage
     private final CustomEnergy ENERGY_STORAGE = new CustomEnergy(25000, 40, 40) {
         @Override
         public void onContentsChanged() {
@@ -48,18 +57,41 @@ public class TurbineBlockEntity extends BlockEntity implements MenuProvider {
 
     protected final ContainerData data;
 
-    public TurbineBlockEntity(BlockPos pos, BlockState blockState) {
-        super(ModBlockEntities.TURBINE_BE.get(), pos, blockState);
+    public TurbineBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.TURBINE_BE.get(), pos, state);
         this.data = createContainerData();
     }
+
+    // ===================== TICK =====================
+
+    public void tick(Level level, BlockPos pos, BlockState state) {
+        if (level.isClientSide) return;
+
+        boolean dirty = false;
+
+        if (steamTank.getFluidAmount() >= STEAM_PER_TICK
+                && ENERGY_STORAGE.getEnergyStored() < ENERGY_STORAGE.getMaxEnergyStored()) {
+
+            steamTank.drain(STEAM_PER_TICK, IFluidHandler.FluidAction.EXECUTE);
+            ENERGY_STORAGE.receiveEnergy(FE_PER_TICK, false);
+
+            dirty = true;
+        }
+
+        if (dirty) {
+            setChanged(level, pos, state);
+        }
+    }
+
+    // ===================== UI =====================
 
     private ContainerData createContainerData() {
         return new ContainerData() {
             @Override
             public int get(int i) {
                 return switch (i) {
-                    case 0 -> steamTank.getFluidAmount();  // Current steam
-                    case 1 -> steamTank.getCapacity();     // Max steam
+                    case 0 -> steamTank.getFluidAmount();
+                    case 1 -> steamTank.getCapacity();
                     case 2 -> ENERGY_STORAGE.getEnergyStored();
                     case 3 -> ENERGY_STORAGE.getMaxEnergyStored();
                     default -> 0;
@@ -67,12 +99,7 @@ public class TurbineBlockEntity extends BlockEntity implements MenuProvider {
             }
 
             @Override
-            public void set(int i, int value) {
-                switch (i) {
-                    case 2 -> ENERGY_STORAGE.setEnergy(value);
-                    // Steam tank is read only from client side
-                }
-            }
+            public void set(int i, int value) {}
 
             @Override
             public int getCount() {
@@ -86,42 +113,51 @@ public class TurbineBlockEntity extends BlockEntity implements MenuProvider {
         return Component.translatable("block.mysticmachine.machine_turbine");
     }
 
-    @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-        return new TurbineMenu(i, inventory, this, this.data);
+    public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
+        return new TurbineMenu(id, inv, this, this.data);
     }
 
-    public void tick(Level level, BlockPos pos, BlockState state) {
-        if (level.isClientSide()) return;
+    // ===================== CAPABILITIES (IMPORTANT FIX) =====================
 
-        boolean dirty = false;
+    /**
+     * THIS is the NeoForge-correct way (NOT getCapability override)
+     */
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
 
-        // If we have steam and energy storage isn't full, consume steam and produce FE
-        if (steamTank.getFluidAmount() >= STEAM_PER_TICK &&
-                ENERGY_STORAGE.getEnergyStored() < ENERGY_STORAGE.getMaxEnergyStored()) {
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ModBlockEntities.TURBINE_BE.get(),
+                (be, side) -> be.steamTank
+        );
 
-            // Drain steam from tank
-            steamTank.drain(new FluidStack(ModFluids.STEAM.get(), STEAM_PER_TICK),
-                    IFluidHandler.FluidAction.EXECUTE);
-
-            // Produce energy
-            ENERGY_STORAGE.receiveEnergy(FE_PER_TICK, false);
-
-            dirty = true;
-        }
-
-        if (dirty) setChanged(level, pos, state);
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                ModBlockEntities.TURBINE_BE.get(),
+                (be, side) -> be.ENERGY_STORAGE
+        );
     }
 
-    // Used by the screen to determine if the turbine is actively generating
+    // ===================== ACCESSORS =====================
+
+    public CustomEnergy getEnergyStorage() {
+        return ENERGY_STORAGE;
+    }
+
+    public IFluidHandler getSteamTank() {
+        return steamTank;
+    }
+
     public boolean isBurning() {
         return steamTank.getFluidAmount() > 0;
     }
 
+    // ===================== SAVE / LOAD =====================
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
+
         steamTank.writeToNBT(registries, tag);
         tag.putInt("energy", ENERGY_STORAGE.getEnergyStored());
     }
@@ -129,11 +165,13 @@ public class TurbineBlockEntity extends BlockEntity implements MenuProvider {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+
         steamTank.readFromNBT(registries, tag);
         ENERGY_STORAGE.setEnergy(tag.getInt("energy"));
     }
 
-    @Nullable
+    // ===================== SYNC =====================
+
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);

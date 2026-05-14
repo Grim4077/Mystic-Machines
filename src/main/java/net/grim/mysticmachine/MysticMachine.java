@@ -1,7 +1,8 @@
 package net.grim.mysticmachine;
 
 import net.grim.mysticmachine.block.ModBlocks;
-import net.grim.mysticmachine.block.entity.ModBlockEntities;
+
+import net.grim.mysticmachine.block.entity.renderer.ModBlockEntities;
 import net.grim.mysticmachine.fluid.ModFluids;
 import net.grim.mysticmachine.items.ModCreativeModTabs;
 import net.grim.mysticmachine.items.ModItems;
@@ -79,6 +80,7 @@ public class MysticMachine {
         event.accept(ModBlocks.RUBY_ORE);
         event.accept(ModBlocks.MACHINE_TURBINE);
         event.accept(ModBlocks.BOILER);
+        event.accept(ModBlocks.LIQUID_PIPE);
         }
     }
 

@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -36,11 +37,12 @@ public class ModCreativeModTabs {
                         output.accept(ModBlocks.DEEPSLATE_SAPPHIRE_ORE);
                         output.accept(ModBlocks.SAPPHIRE_BLOCK);
 
-                        output.accept(ModBlocks.MACHINE_TURBINE);
 
+
+                        //THE MODE
+                        output.accept(ModBlocks.MACHINE_TURBINE);
                         output.accept(ModBlocks.BOILER);
-
-                        output.accept(ModBlocks.MACHINE_TURBINE);
+                        output.accept(ModBlocks.LIQUID_PIPE);
                     }).build());
 
     public static void register(IEventBus eventBus) {

@@ -1,5 +1,6 @@
 package net.grim.mysticmachine.block.entity;
 
+import net.grim.mysticmachine.block.entity.renderer.ModBlockEntities;
 import net.grim.mysticmachine.fluid.ModFluids;
 import net.grim.mysticmachine.screen.menu.BoilerMenu;
 import net.minecraft.core.BlockPos;
@@ -108,7 +109,7 @@ public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
         }
 
         if (steamTank.getFluidAmount() > 0) {
-            transferSteam();
+            transferSteam(level, pos);
             saveFlag = true;
         }
 
@@ -133,6 +134,8 @@ public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
         itemHandler.deserializeNBT(registries, tag.getCompound("Inventory"));
     }
 
+
+
     public boolean isAdjacentToWater(Level level, BlockPos pos) {
         for (Direction dir : Direction.values()) {
             if (level.getFluidState(pos.relative(dir)).is(FluidTags.WATER))
@@ -151,35 +154,41 @@ public class BoilerBlockEntity extends BlockEntity implements MenuProvider {
     private void produceSteam() {
         steamTank.fill(new FluidStack(ModFluids.STEAM.get(), steamTickRate), IFluidHandler.FluidAction.EXECUTE);
     }
+    public IFluidHandler getSteamTank() {
+        return steamTank;
+    }
 
-    private void transferSteam() {
-        // Determine how much we CAN send from our tank first
-        int maxExtract = Math.min(steamTank.getFluidAmount(), 100); // Send up to 100mb per tick
-        if (maxExtract <= 0) return;
+    private void transferSteam(Level level, BlockPos pos) {
 
-        FluidStack available = new FluidStack(ModFluids.STEAM.get(), maxExtract);
+        int toSend = Math.min(steamTank.getFluidAmount(), 100);
+        if (toSend <= 0) return;
 
         for (Direction dir : Direction.values()) {
-            if (available.isEmpty()) break;
 
-            BlockEntity targetBE = level.getBlockEntity(worldPosition.relative(dir));
-            if (targetBE == null) continue;
+            if (toSend <= 0) return;
 
-            // Get the fluid handler of the neighbor
-            IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK,
-                    worldPosition.relative(dir), dir.getOpposite());
+            IFluidHandler handler = level.getCapability(
+                    Capabilities.FluidHandler.BLOCK,
+                    pos.relative(dir),
+                    null
+            );
 
-            if (handler != null) {
-                // How much can the neighbor actually take?
-                int accepted = handler.fill(available, IFluidHandler.FluidAction.EXECUTE);
+            if (handler == null) continue;
 
-                if (accepted > 0) {
-                    // Drain only what was actually accepted from our tank
-                    steamTank.drain(accepted, IFluidHandler.FluidAction.EXECUTE);
+            FluidStack simulated = new FluidStack(ModFluids.STEAM.get(), toSend);
 
-                    // Update our 'available' stack for the next direction in the loop
-                    available.shrink(accepted);
-                }
+            int accepted = handler.fill(simulated, IFluidHandler.FluidAction.SIMULATE);
+
+            if (accepted > 0) {
+
+                int drained = handler.fill(
+                        new FluidStack(ModFluids.STEAM.get(), accepted),
+                        IFluidHandler.FluidAction.EXECUTE
+                );
+
+                steamTank.drain(drained, IFluidHandler.FluidAction.EXECUTE);
+
+                toSend -= drained;
             }
         }
     }

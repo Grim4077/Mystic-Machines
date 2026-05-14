@@ -2,22 +2,43 @@ package net.grim.mysticmachine.block.entity.renderer;
 
 import net.grim.mysticmachine.MysticMachine;
 import net.grim.mysticmachine.block.ModBlocks;
+import net.grim.mysticmachine.block.entity.BoilerBlockEntity;
+import net.grim.mysticmachine.block.entity.LiquidPipeBlockEntity;
 import net.grim.mysticmachine.block.entity.TurbineBlockEntity;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ModBlockEntities {
 
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
-            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MysticMachine.MOD_ID);
+            DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, MysticMachine.MOD_ID);
+
+    // BOILER
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BoilerBlockEntity>> BOILER_BE =
+            BLOCK_ENTITIES.register("boiler_be",
+                    () -> BlockEntityType.Builder.of(
+                            BoilerBlockEntity::new,
+                            ModBlocks.BOILER.get()
+                    ).build(null)
+            );
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TurbineBlockEntity>> TURBINE_BE =
             BLOCK_ENTITIES.register("turbine_be",
                     () -> BlockEntityType.Builder.of(
-                            TurbineBlockEntity::new, ModBlocks.MACHINE_TURBINE.get()).build(null)
+                            TurbineBlockEntity::new,
+                            ModBlocks.MACHINE_TURBINE.get()
+                    ).build(null)
+            );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<LiquidPipeBlockEntity>> LIQUID_PIPE_BE =
+            BLOCK_ENTITIES.register("liquid_pipe",
+                    () -> BlockEntityType.Builder.of(
+                            LiquidPipeBlockEntity::new,
+                            ModBlocks.LIQUID_PIPE.get()
+                    ).build(null)
             );
 
     public static void register(IEventBus eventBus) {

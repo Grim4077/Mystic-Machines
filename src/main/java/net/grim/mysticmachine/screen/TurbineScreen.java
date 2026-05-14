@@ -91,7 +91,7 @@ public class TurbineScreen extends AbstractContainerScreen<TurbineMenu> {
             // Steam Tooltip (X: 17, Y: 11, W: 14, H: 52)
             if (isHovering(17, 11, 14, 52, mouseX, mouseY)) {
                 guiGraphics.renderTooltip(this.font,
-                        Component.literal("Generating Power"),
+                        Component.literal(menu.getSteam() + " / " + menu.getMaxSteam() + " Steam"),
                         mouseX, mouseY);
             }
         }
