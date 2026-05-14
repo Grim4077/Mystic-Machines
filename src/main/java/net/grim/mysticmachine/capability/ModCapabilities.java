@@ -34,5 +34,12 @@ public class ModCapabilities {
                 ModBlockEntities.BOILER_BE.get(),
                 (be, side) -> be.steamTank
         );
+
+        // LIQUID PIPE (INPUT + OUTPUT STEAM)
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ModBlockEntities.LIQUID_PIPE_BE.get(),
+                (be, side) -> be.tank
+        );
     }
 }

@@ -31,9 +31,9 @@
             // PULL
             for (Direction dir : Direction.values()) {
 
-                if (level.getBlockState(pos.relative(dir)).getBlock() instanceof LiquidPipeBlock) {
-                    continue;
-                }
+                //if (level.getBlockState(pos.relative(dir)).getBlock() instanceof LiquidPipeBlock) {
+                    //continue;
+                //}
 
 
                 IFluidHandler from = level.getCapability(
@@ -62,9 +62,9 @@
             if (snapshot.isEmpty()) return;
 
             for (Direction dir : Direction.values()) {
-                if (level.getBlockState(pos.relative(dir)).getBlock() instanceof LiquidPipeBlock) {
-                    continue;
-                }
+                //if (level.getBlockState(pos.relative(dir)).getBlock() instanceof LiquidPipeBlock) {
+                    //continue;
+                //}
 
                 IFluidHandler to = level.getCapability(
                         Capabilities.FluidHandler.BLOCK,
